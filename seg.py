@@ -7,7 +7,12 @@ Created on Mon Jul  1 13:34:04 2019
 
 #%%
 import pickle
+import numpy
+from nltk import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 #%%
 
 #segregates the given text file into individual articles 
@@ -18,7 +23,7 @@ def seg(file_name):
     
     file.close
     
-    pickle.dump(foo, open(file_name+"-split.pkl", "wb"))
+    pickle.dump(txt, open(file_name+"-split.pkl", "wb"))
     
     return txt
 
@@ -35,25 +40,48 @@ def seg(file_name):
 def token(file_name):
     
     try:
-        foo = pickle.load(open(file_name+"-split.pkl", "rb"))
-    except (OSError, IOError) as e:
+        text = pickle.load(open(file_name+"-split.pkl", "rb"))
+    except (OSError, IOError):
         text = seg(file_name)
     
-    for i in text:
-        count_vect = CountVectorizer(stopwords='english')
-        tokens = count_vect.fit_transform(text)
+    tokens = numpy.empty(text.length())
+    count_vect = CountVectorizer(stopwords='english')
     
-    pickle.dump(foo, open(file_name+"-split.pkl", "wb"))
+    for i in text:
+        tokens[i] = count_vect.fit_transform(text[i])
+    
+    pickle.dump(text, open(file_name+"-split.pkl", "wb"))
     
     return tokens
 
 #%%
-#lemmatization
-#def lem(file_name):
+#lemmatization from file
+def lem(file_name):
+    
+    try:
+        text = pickle.load(open(file_name+"-split.pkl", "rb"))
+    except (OSError, IOError):
+        text = seg(file_name)
+        
+    lemma = numpy.empty(text.length())
+    lem = WordNetLemmatizer()
+    
+    for i in text:
+        lemma[i] = lem.lemmatize(text[i])
+    
+    pickle.dump(text, open(file_name+"-split.pkl", "wb"))
+    
+    return lemma    
+
+#%%
+#lemmatization from tokens
+    
 
 #%%
 #Bag of words
 #tf-idf
+#word embedding
+
 
 #%%
 #word2vec / doc2vec
@@ -64,8 +92,26 @@ def token(file_name):
 #%%
 #K-means
 
+#def kmeans(file_name):
+#    
+#    text = token(file_name)
+#    
+#    km = KMeans(n_clusters=2, init = 'random')
+#    labels = km.fit_predict(text)
+#    
+#    pca = PCA(n_components=2)
+#    text_pca = pca.fit_transform(text)
+#    plt.scatter(text_pca[:, 0], text_pca[:, 1], c=km.labels_, alpha=.5)
+#    plt.title("KMeans")
+#    plt.gca().set_aspect("equal")
+#    plt.figure()
+
 #%%
 #Naive-bayes    
+
+
+#%%
+#dbscan
         
         
         
