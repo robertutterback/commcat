@@ -65,7 +65,7 @@ def countVect(file_name):
     for i, article in enumerate(text):
         text[i] = count_vect.fit_transform(article)
         
-    pickle.dump(text, open(file_name+"-split.pkl", "wb")
+    pickle.dump(text, open(file_name+"-split.pkl", "wb"))
     
     return text
     
@@ -129,7 +129,8 @@ def lem(file_name):
 
 def kmeans(file_name):
     
-       
+    text = countVect(file_name)
+    
     km = KMeans(n_clusters=2, init = 'random')
     km.fit_predict(text)
     
