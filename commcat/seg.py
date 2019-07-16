@@ -23,9 +23,9 @@ from sklearn.decomposition import PCA
 #%%
 #removing the metadata
 def met(txt):
-    for i in txt:
-        txt[i] = txt[i].split("++")[1]
-    
+    for i, article in enumerate(txt):
+        txt[i] = article.split("++")[1]
+        
     return txt
 
 #segregates the given text file into individual articles 
@@ -36,7 +36,7 @@ def seg(file_name):
                    
     file.close
     
-    txt = met(txt)
+    #txt = met(txt)
     
     pickle.dump(txt, open(file_name+"-split.pkl", "wb"))
     
@@ -51,6 +51,26 @@ def seg(file_name):
 #    pickle.dump(foo, open("var.pickle", "wb"))
 
 #%%
+#CountVecotrizer
+
+def countVect(file_name):
+    
+    try:
+        text = pickle.load(open(file_name+"-split.pkl", "rb"))
+    except (OSError, IOError):
+        text = seg(file_name)
+    
+    count_vect = CountVectorizer(stopwords='english')
+    
+    for i, article in enumerate(text):
+        text[i] = count_vect.fit_transform(article)
+        
+    pickle.dump(text, open(file_name+"-split.pkl", "wb")
+    
+    return text
+    
+ 
+#%%
 #Tokenization
 def token(file_name):
     
@@ -59,7 +79,7 @@ def token(file_name):
     except (OSError, IOError):
         text = seg(file_name)
     
-    tokens = numpy.empty(text.length())
+    tokens = numpy.empty(text.len())
     count_vect = CountVectorizer(stopwords='english')
     
     for i in text:
@@ -78,7 +98,7 @@ def lem(file_name):
     except (OSError, IOError):
         text = seg(file_name)
         
-    lemma = numpy.empty(text.length())
+    lemma = numpy.empty(text.len())
     lem = WordNetLemmatizer()
     
     for i in text:
@@ -109,8 +129,7 @@ def lem(file_name):
 
 def kmeans(file_name):
     
-    text = token(file_name)
-    
+       
     km = KMeans(n_clusters=2, init = 'random')
     km.fit_predict(text)
     
@@ -129,3 +148,5 @@ def kmeans(file_name):
 
 #%%
 #dbscan
+
+#%%

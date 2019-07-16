@@ -10,7 +10,7 @@ import seg
 
 class TestSeg(unittest.TestCase):
     
-    def test_met(self):
+    """ def test_met(self):
         
         txt = {}
         act = seg.met(txt)
@@ -25,52 +25,53 @@ class TestSeg(unittest.TestCase):
         txt = {"b++a","a++b"}
         act = seg.met(txt)
         exp = {"a","b"}
-        self.assertEqual(act, exp)
+        self.assertEqual(act, exp) """
     
     def test_seg(self):
         
         act = seg.seg(r"emptyText.txt")
-        exp = {}
+        exp = ['']
         self.assertEqual(act, exp)
         
         act = seg.seg(r"testFile1.txt")
-        exp = {"hello"}
+        exp = ["hello"]
         self.assertEqual(act, exp)
         
         act = seg.seg(r"testFile2.txt")
-        exp = {"hello", "world"}
+        exp = ["hello", "world"]
         self.assertEqual(act, exp)
     
     def test_token(self):
         
-        act = seg.seg(r"emptyText.txt")
-        exp = {}
+        act = seg.token(r"emptyText.txt")
+        exp = ['']
         self.assertEqual(act, exp)
         
-        act = seg.seg(r"testFile1.txt")
-        exp = {"hello"}
+        act = seg.token(r"testFile1.txt")
+        exp = ["hello"]
         self.assertEqual(act, exp)
         
-        act = seg.seg(r"testFile2.txt")
-        exp = {"hello", "world"}
+        act = seg.token(r"testFile2.txt")
+        exp = ["hello", "world"]
         self.assertEqual(act, exp)
         
-        act = seg.seg(r"testFile3.txt")
-        exp = {"this", "is", "a", "sentence","."}
+        act = seg.token(r"testFile3.txt")
+        exp = ["this", "is", "a", "sentence","."]
         self.assertEqual(act, exp)
     
     def test_lem(self):
         
-        act = seg.seg(r"emptyText.txt")
-        exp = {}
+        act = seg.lem(r"emptyText.txt")
+        exp = ['']
         self.assertEqual(act, exp)
         
-        act = seg.seg(r"testFile1.txt")
-        exp = {"hello"}
+        act = seg.lem(r"testFile1.txt")
+        exp = ["hello"]
         self.assertEqual(act, exp)
         
-        act = seg.seg(r"testFile4(lem).txt")
-        exp = {"write", "write"}
+        act = seg.lem(r"testFile4(lem).txt")
+        exp = ["write", "write"]
         self.assertEqual(act, exp)
         
-        
+if __name__ == '__main__':
+    unittest.main()
