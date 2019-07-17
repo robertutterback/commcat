@@ -36,7 +36,7 @@ def seg(file_name):
                    
     file.close
     
-    #txt = met(txt)
+    txt = met(txt)
     
     pickle.dump(txt, open(file_name+"-split.pkl", "wb"))
     
@@ -62,12 +62,17 @@ def countVect(file_name):
     
     count_vect = CountVectorizer(stopwords='english')
     
+    X = count_vect.fit_transform(text)
+    
     for i, article in enumerate(text):
-        text[i] = count_vect.fit_transform(article)
+        temp = article.split()
+        wordCount = len(temp)
+        
+        X[i] = X[i]/wordCount
         
     pickle.dump(text, open(file_name+"-split.pkl", "wb"))
     
-    return text
+    return X
     
  
 #%%
@@ -129,14 +134,14 @@ def lem(file_name):
 
 def kmeans(file_name):
     
-    text = countVect(file_name)
+    X = countVect(file_name)
     
     km = KMeans(n_clusters=2, init = 'random')
-    km.fit_predict(text)
+    km.fit_predict(X)
     
     pca = PCA(n_components=2)
-    text_pca = pca.fit_transform(text)
-    plt.scatter(text_pca[:, 0], text_pca[:, 1], c=km.labels_, alpha=.5)
+    X_pca = pca.fit_transform(X)
+    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=km.labels_, alpha=.5)
     plt.title("KMeans")
     plt.gca().set_aspect("equal")
     plt.figure()
