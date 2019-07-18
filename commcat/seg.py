@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jul 11 17:54:07 2019
@@ -5,15 +6,9 @@ Created on Thu Jul 11 17:54:07 2019
 @author: Abhi
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  1 13:34:04 2019
-
-@author: Abhi
-"""
-
 #%%
-import pickle
+import pickle, os, sys, argparse, re
+import codecs # to decode the weird CP1252 files
 import numpy
 from nltk import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
@@ -21,34 +16,71 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 #%%
-#removing the metadata
-def met(txt):
-    for i, article in enumerate(txt):
-        txt[i] = article.split("++")[1]
-        
-    return txt
 
-#segregates the given text file into individual articles 
-def seg(file_name):
-    file = open(file_name, "r")
-    
-    txt = file.read().split("##")
-                   
-    file.close
-    
-    txt = met(txt)
-    
-    pickle.dump(txt, open(file_name+"-split.pkl", "wb"))
-    
-    return txt
+# Global config
+ARTICLE_SPLITTER = re.compile(r"^##$", re.MULTILINE)
+METADATA_SPLITTER = re.compile(r"^\+\+$", re.MULTILINE)
+DATA_DIR = '../data/geopolitical'
+PICKLE_DIR = './.pickled'
+if not os.path.exists(PICKLE_DIR):
+  os.mkdir(PICKLE_DIR)
 
-#%%
+# Arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", help="Print lots of information",
+                    action="store_true", default=True)
+parser.add_argument("basenames", nargs='+')
+prog_args = parser.parse_args()
 
-#try:
-#    foo = pickle.load(open("var.pickle", "rb"))
-#except (OSError, IOError) as e:
-#    foo = 3
-#    pickle.dump(foo, open("var.pickle", "wb"))
+def vprint(*args, **kwargs):
+  if prog_args.verbose:
+    print(*args, **kwargs)
+
+def pickle_name(basename, stepname):
+  return f"{PICKLE_DIR}/{basename}-{stepname}.pkl"
+
+def get_body(article):
+  parts = re.split(METADATA_SPLITTER, article)
+  if len(parts) != 2:
+    print("\n\nArticle splitting failed!")
+    print(article)
+    sys.exit(1)
+  return parts[1]
+    
+# Reads articles from a file, removing metadata and returning a list
+# of articles.
+def load_new_file(basename):
+  filename = f"{DATA_DIR}/{basename}.txt"
+  vprint(f"Processing {filename}", end='')
+
+  with codecs.open(filename, 'rb', 'cp1252') as f:
+    full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
+
+  article_bodies = [get_body(a) for a in full_articles]
+
+  with open(pickle_name(basename, 'split'), 'wb') as f:
+    pickle.dump(article_bodies, f)
+
+  return article_bodies
+
+def load_pickled(filename):
+  vprint(f"Loading pickled data from {filename}", end='')
+  with open(filename, 'rb') as f:
+    data = pickle.load(f)
+  if data == None:
+    print(" ... No data! Quitting.")
+    sys.exit(1)
+  return data
+
+def load_file(basename):
+  filename = pickle_name(basename, 'split')
+  if os.path.exists(filename): # load from pickled
+    articles = load_pickled(filename)
+  else: # have to process it
+    articles = load_new_file(basename)
+
+  vprint(f" ... found {len(articles)} articles.")
+  return articles
 
 #%%
 #CountVecotrizer
@@ -147,6 +179,11 @@ def kmeans(file_name):
     plt.figure()
     
     return
+
+if __name__ == "__main__":
+  for basename in prog_args.basenames:
+    load_file(basename)
+
 
 #%%
 #Naive-bayes    
