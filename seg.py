@@ -87,22 +87,19 @@ def load_file(basename):
 
 def countVect(file_name):
     
-    try:
-        text = pickle.load(open(file_name+"-split.pkl", "rb"))
-    except (OSError, IOError):
-        text = seg(file_name)
+    articles = load_file(file_name)
     
     count_vect = CountVectorizer(stopwords='english')
     
-    X = count_vect.fit_transform(text)
+    X = count_vect.fit_transform(articles)
     
-    for i, article in enumerate(text):
+    for i, article in enumerate(articles):
         temp = article.split()
         wordCount = len(temp)
         
         X[i] = X[i]/wordCount
         
-    pickle.dump(text, open(file_name+"-split.pkl", "wb"))
+    pickle.dump(articles, open(file_name+"-split.pkl", "wb"))
     
     return X
     
@@ -111,18 +108,15 @@ def countVect(file_name):
 #Tokenization
 def token(file_name):
     
-    try:
-        text = pickle.load(open(file_name+"-split.pkl", "rb"))
-    except (OSError, IOError):
-        text = seg(file_name)
+    articles = load_file(file_name)
     
-    tokens = numpy.empty(text.len())
+    tokens = numpy.empty(articles.len())
     count_vect = CountVectorizer(stopwords='english')
     
-    for i in text:
-        tokens[i] = count_vect.fit_transform(text[i])
+    for i in articles:
+        tokens[i] = count_vect.fit_transform(articles[i])
     
-    pickle.dump(text, open(file_name+"-split.pkl", "wb"))
+    pickle.dump(articles, open(file_name+"-split.pkl", "wb"))
     
     return tokens
 
@@ -130,18 +124,15 @@ def token(file_name):
 #lemmatization from file
 def lem(file_name):
     
-    try:
-        text = pickle.load(open(file_name+"-split.pkl", "rb"))
-    except (OSError, IOError):
-        text = seg(file_name)
+    articles = load_file(file_name)
         
-    lemma = numpy.empty(text.len())
+    lemma = numpy.empty(articles.len())
     lem = WordNetLemmatizer()
     
-    for i in text:
-        lemma[i] = lem.lemmatize(text[i])
+    for i in articles:
+        lemma[i] = lem.lemmatize(articles[i])
     
-    pickle.dump(text, open(file_name+"-split.pkl", "wb"))
+    pickle.dump(articles, open(file_name+"-split.pkl", "wb"))
     
     return lemma    
 
