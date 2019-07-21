@@ -85,7 +85,7 @@ def load_file(basename):
 #%%
 #CountVecotrizer
 
-def countVect(file_name):
+def encoding(file_name):
     
     articles = load_file(file_name)
     
@@ -112,9 +112,8 @@ def token(file_name):
     
     tokens = numpy.empty(articles.len())
     count_vect = CountVectorizer(stopwords='english')
-    
-    for i in articles:
-        tokens[i] = count_vect.fit_transform(articles[i])
+        
+    tokens = [count_vect.fit_transform(a) for a in articles]
     
     pickle.dump(articles, open(file_name+"-split.pkl", "wb"))
     
@@ -129,8 +128,7 @@ def lem(file_name):
     lemma = numpy.empty(articles.len())
     lem = WordNetLemmatizer()
     
-    for i in articles:
-        lemma[i] = lem.lemmatize(articles[i])
+    lemma = [lem.lemmatize(a) for a in articles]
     
     pickle.dump(articles, open(file_name+"-split.pkl", "wb"))
     
@@ -157,7 +155,7 @@ def lem(file_name):
 
 def kmeans(file_name):
     
-    X = countVect(file_name)
+    X = encoding(file_name)
     
     km = KMeans(n_clusters=2, init = 'random')
     km.fit_predict(X)
