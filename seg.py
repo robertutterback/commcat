@@ -41,10 +41,7 @@ def pickle_name(basename, stepname):
 
 def get_body(article):
   parts = re.split(METADATA_SPLITTER, article)
-  if len(parts) != 2:
-    print("\n\nArticle splitting failed!")
-    print(article)
-    sys.exit(1)
+  assert len(parts) == 2, "\n\nArticle splitting failed!"
   return parts[1]
     
 # Reads articles from a file, removing metadata and returning a list
@@ -52,6 +49,8 @@ def get_body(article):
 def load_new_file(basename):
   filename = f"{DATA_DIR}/{basename}.txt"
   vprint(f"Processing {filename}", end='')
+
+  assert os.path.exists(filename), f"{filename} does not exist!"
 
   with codecs.open(filename, 'rb', 'cp1252') as f:
     full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
@@ -67,11 +66,10 @@ def load_pickled(filename):
   vprint(f"Loading pickled data from {filename}", end='')
   with open(filename, 'rb') as f:
     data = pickle.load(f)
-  if data == None:
-    print(" ... No data! Quitting.")
-    sys.exit(1)
+  assert data != None, "No data!"
   return data
 
+# Check for pickled file and load, otherwise process from scratch.
 def load_file(basename):
   filename = pickle_name(basename, 'split')
   if os.path.exists(filename): # load from pickled
