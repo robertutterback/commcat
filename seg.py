@@ -34,87 +34,75 @@ parser.add_argument("basenames", nargs='+')
 prog_args = parser.parse_args()
 
 def vprint(*args, **kwargs):
-  if prog_args.verbose:
-      print(*args, **kwargs)
+    if prog_args.verbose:
+        print(*args, **kwargs)
 
 def pickle_name(basename, stepname):
-  return f"{PICKLE_DIR}/{basename}-{stepname}.pkl"
+    return f"{PICKLE_DIR}/{basename}-{stepname}.pkl"
 
 def get_body(article):
     parts = re.split(METADATA_SPLITTER, article)
     assert len(parts) == 2, "\n\nArticle splitting failed!"
-  return parts[1]
+    return parts[1]
     
 # Reads articles from a file, removing metadata and returning a list
 # of articles.
 def load_new_file(basename):
-  filename = f"{DATA_DIR}/{basename}.txt"
-  vprint(f"Processing {filename}", end='')
+    filename = f"{DATA_DIR}/{basename}.txt"
+    vprint(f"Processing {filename}", end='')
 
-  assert os.path.exists(filename), f"{filename} does not exist!"
+    assert os.path.exists(filename), f"{filename} does not exist!"
 
-  with codecs.open(filename, 'rb', 'cp1252') as f:
-    full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
+    with codecs.open(filename, 'rb', 'cp1252') as f:
+        full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
 
-  article_bodies = [get_body(a) for a in full_articles]
+    article_bodies = [get_body(a) for a in full_articles]
 
-  with open(pickle_name(basename, 'split'), 'wb') as f:
-    pickle.dump(article_bodies, f)
+    with open(pickle_name(basename, 'split'), 'wb') as f:
+        pickle.dump(article_bodies, f)
 
-  return article_bodies
+    return article_bodies
 
 def load_pickled(filename):
-  vprint(f"Loading pickled data from {filename}", end='')
-  with open(filename, 'rb') as f:
-    data = pickle.load(f)
-  assert data != None, "No data!"
-  return data
+    vprint(f"Loading pickled data from {filename}", end='')
+    with open(filename, 'rb') as f:
+        data = pickle.load(f)
+    assert data != None, "No data!"
+    return data
 
 # Check for pickled file and load, otherwise process from scratch.
 def load_file(basename):
-  filename = pickle_name(basename, 'split')
-  if os.path.exists(filename): # load from pickled
-    articles = load_pickled(filename)
-  else: # have to process it
-    articles = load_new_file(basename)
+    filename = pickle_name(basename, 'split')
+    if os.path.exists(filename): # load from pickled
+        articles = load_pickled(filename)
+    else: # have to process it
+        articles = load_new_file(basename)
 
-  vprint(f" ... found {len(articles)} articles.")
-  return articles
+    vprint(f" ... found {len(articles)} articles.")
+    return articles
 
 #%%
 #CountVecotrizer
 
 def encoding(articles):
     vectorizer = CountVectorizer()
-  X = vectorizer.fit_transform(articles)
+    X = vectorizer.fit_transform(articles)
     
-  for i, article in enumerate(articles):
-    wordCount = len(article.split())
-    X[i] /= wordCount
+    for i, article in enumerate(articles):
+        wordCount = len(article.split())
+        X[i] /= wordCount
     
-  return X
+    return X
     
  
 #%%
-#Tokenization
-def token(articles):
-    tokens = numpy.empty(articles.len())
-    count_vect = CountVectorizer(stop_words='english')
-    #add back stopwords
-        
-    tokens = [count_vect.fit_transform(a) for a in articles]
-    
-    return tokens
 
 #%%
 #lemmatization from file
 def lem(articles):
-         
     lemma = numpy.empty(articles.len())
     lem = WordNetLemmatizer()
-    
     lemma = [lem.lemmatize(a) for a in articles]
-        
     return lemma    
 
 #%%
@@ -145,11 +133,15 @@ def kmeans(X, num_clusters=2):
 #visualization
 
 def visualize(X, labels, centers):
-    X_pca = PCA(n_components=2).fit_transform(X)
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X)
 
-    plt.scatter(X_pca[:, 0], X_pca[:, 1],alpha=.5)
+    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=labels, alpha=.5)
+
+    # TODO: Also plot the cluster centers
+    
     n_clusters = np.unique(labels)
-    plt.title("KMeans")
+    plt.title(f"KMeans Clustering with {n_clusters} clusters, PCA")
     plt.gca().set_aspect("equal")
     plt.figure()
     
@@ -159,10 +151,10 @@ def visualize(X, labels, centers):
 #Main Function
 
 if __name__ == "__main__":
-  articles = [load_file(basename) for basename in prog_args.basenames]
-  X = encoding(articles)
-  labels, centers = kmeans(X)
-  visualize(X, labels, centers) 
+    articles = [load_file(basename) for basename in prog_args.basenames]
+    X = encoding(articles)
+    labels, centers = kmeans(X)
+    visualize(X, labels, centers) 
 
 #%%
 #Naive-bayes    
