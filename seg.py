@@ -166,17 +166,10 @@ def visualize(data, components = 2)    :
 
 if __name__ == "__main__":
   for basename in prog_args.basenames:
-    
     articles = load_file(basename)
-    
     data = encoding(articles)
-    
     X = kmeans(data)
-    
     visualize(X)    
-    
-    pickle.dump(articles, open(basename+"-split.pkl", "wb"))
-
 
 #%%
 #Naive-bayes    
