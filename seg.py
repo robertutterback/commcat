@@ -135,8 +135,8 @@ def lem(articles):
 #%%
 #K-Means
 
-def kmeans(X):
-    km = KMeans(n_clusters=2, init = 'random')
+def kmeans(X, num_clusters=2):
+    km = KMeans(n_clusters=num_clusters)
     model = km.fit_predict(data)
     return model.labels_, model.cluster_centers_
 
@@ -144,8 +144,8 @@ def kmeans(X):
 #visualization
 
 def visualize(X, labels, centers):
-    pca = PCA(n_components=2)
-    X_pca = pca.fit_transform(data)
+    X_pca = PCA(n_components=2).fit_transform(X)
+    n_clusters = np.unique(labels)
     plt.scatter(X_pca[:, 0], X_pca[:, 1],alpha=.5)
     plt.title("KMeans")
     plt.gca().set_aspect("equal")
