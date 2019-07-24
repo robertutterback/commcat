@@ -81,6 +81,12 @@ def load_file(basename):
     vprint(f" ... found {len(articles)} articles.")
     return articles
 
+def load_multiple(basenames):
+    articles = []
+    for basename in prog_args.basenames:
+        articles.extend(load_file(basename))
+    return articles
+
 #%%
 #CountVecotrizer
 
@@ -151,7 +157,7 @@ def visualize(X, labels, centers):
 #Main Function
 
 if __name__ == "__main__":
-    articles = [load_file(basename) for basename in prog_args.basenames]
+    articles = load_multiple(prog_args.basenames)
     X = encoding(articles)
     labels, centers = kmeans(X)
     visualize(X, labels, centers) 
