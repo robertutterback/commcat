@@ -9,7 +9,7 @@ Created on Thu Jul 11 17:54:07 2019
 #%%
 import pickle, os, sys, argparse, re
 import codecs # to decode the weird CP1252 files
-import numpy
+import numpy as np
 from nltk import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.cluster import KMeans
@@ -92,7 +92,8 @@ def load_multiple(basenames):
 
 def encoding(articles):
     vectorizer = CountVectorizer()
-    X = vectorizer.fit_transform(articles)
+    # We convert to float so that we can divide
+    X = vectorizer.fit_transform(articles).astype(np.float32)
     
     for i, article in enumerate(articles):
         wordCount = len(article.split())
@@ -106,7 +107,7 @@ def encoding(articles):
 #%%
 #lemmatization from file
 def lem(articles):
-    lemma = numpy.empty(articles.len())
+    lemma = np.empty(articles.len()) # ???
     lem = WordNetLemmatizer()
     lemma = [lem.lemmatize(a) for a in articles]
     return lemma    
@@ -132,7 +133,7 @@ def lem(articles):
 
 def kmeans(X, num_clusters=2):
     km = KMeans(n_clusters=num_clusters)
-    model = km.fit_predict(data)
+    model = km.fit(X)
     return model.labels_, model.cluster_centers_
 
 #%%
