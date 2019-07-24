@@ -23,7 +23,7 @@ METADATA_SPLITTER = re.compile(r"^\+\+$", re.MULTILINE)
 DATA_DIR = './data/geopolitical'
 PICKLE_DIR = './.pickled'
 if not os.path.exists(PICKLE_DIR):
-  os.mkdir(PICKLE_DIR)
+    os.mkdir(PICKLE_DIR)
 
 # Arguments
 parser = argparse.ArgumentParser()
@@ -34,14 +34,14 @@ prog_args = parser.parse_args()
 
 def vprint(*args, **kwargs):
   if prog_args.verbose:
-    print(*args, **kwargs)
+      print(*args, **kwargs)
 
 def pickle_name(basename, stepname):
   return f"{PICKLE_DIR}/{basename}-{stepname}.pkl"
 
 def get_body(article):
-  parts = re.split(METADATA_SPLITTER, article)
-  assert len(parts) == 2, "\n\nArticle splitting failed!"
+    parts = re.split(METADATA_SPLITTER, article)
+    assert len(parts) == 2, "\n\nArticle splitting failed!"
   return parts[1]
     
 # Reads articles from a file, removing metadata and returning a list
@@ -84,24 +84,19 @@ def load_file(basename):
 #CountVecotrizer
 
 def encoding(articles):
+    vectorizer = CountVectorizer()
+  X = vectorizer.fit_transform(articles)
     
-    count_vect = CountVectorizer()
-    #add back stopwords
-    X = count_vect.fit_transform(articles)
+  for i, article in enumerate(articles):
+    wordCount = len(article.split())
+    X[i] /= wordCount
     
-    for i, article in enumerate(articles):
-        temp = article.split()
-        wordCount = len(temp)
-        
-        X[i] = X[i]/wordCount
-    
-    return X
+  return X
     
  
 #%%
 #Tokenization
 def token(articles):
-        
     tokens = numpy.empty(articles.len())
     count_vect = CountVectorizer(stop_words='english')
     #add back stopwords
@@ -140,19 +135,16 @@ def lem(articles):
 #%%
 #K-Means
 
-def kmeans(data):
-    
+def kmeans(X):
     km = KMeans(n_clusters=2, init = 'random')
-    X = km.fit_predict(data)
-    
-    return X
+    model = km.fit_predict(data)
+    return model.labels_, model.cluster_centers_
 
 #%%
 #visualization
 
-def visualize(data, components = 2)    :
-    
-    pca = PCA(n_components=components)
+def visualize(X, labels, centers):
+    pca = PCA(n_components=2)
     X_pca = pca.fit_transform(data)
     plt.scatter(X_pca[:, 0], X_pca[:, 1],alpha=.5)
     plt.title("KMeans")
@@ -166,9 +158,9 @@ def visualize(data, components = 2)    :
 
 if __name__ == "__main__":
   articles = [load_file(basename) for basename in prog_args.basenames]
-  data = encoding(articles)
-  model = kmeans(data)
-  visualize(model) 
+  X = encoding(articles)
+  labels, centers = kmeans(X)
+  visualize(X, labels, centers) 
 
 #%%
 #Naive-bayes    
