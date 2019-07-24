@@ -103,7 +103,7 @@ def encoding(articles):
 def token(articles):
         
     tokens = numpy.empty(articles.len())
-    count_vect = CountVectorizer()
+    count_vect = CountVectorizer(stop_words='english')
     #add back stopwords
         
     tokens = [count_vect.fit_transform(a) for a in articles]
