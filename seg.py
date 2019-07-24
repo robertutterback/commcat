@@ -9,7 +9,7 @@ Created on Thu Jul 11 17:54:07 2019
 #%%
 import pickle, os, sys, argparse, re
 import codecs # to decode the weird CP1252 files
-import numpy
+nimport numpy
 from nltk import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.cluster import KMeans
@@ -165,11 +165,10 @@ def visualize(data, components = 2)    :
 #Main Function
 
 if __name__ == "__main__":
-  for basename in prog_args.basenames:
-    articles = load_file(basename)
-    data = encoding(articles)
-    X = kmeans(data)
-    visualize(X)    
+  articles = [load_file(basename) for basename in prog_args.basenames]
+  data = encoding(articles)
+  model = kmeans(data)
+  visualize(model) 
 
 #%%
 #Naive-bayes    
