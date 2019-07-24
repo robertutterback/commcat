@@ -9,12 +9,13 @@ Created on Thu Jul 11 17:54:07 2019
 #%%
 import pickle, os, sys, argparse, re
 import codecs # to decode the weird CP1252 files
-nimport numpy
+import numpy
 from nltk import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
 #%%
 
 # Global config
@@ -145,8 +146,9 @@ def kmeans(X, num_clusters=2):
 
 def visualize(X, labels, centers):
     X_pca = PCA(n_components=2).fit_transform(X)
-    n_clusters = np.unique(labels)
+
     plt.scatter(X_pca[:, 0], X_pca[:, 1],alpha=.5)
+    n_clusters = np.unique(labels)
     plt.title("KMeans")
     plt.gca().set_aspect("equal")
     plt.figure()
