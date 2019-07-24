@@ -20,7 +20,7 @@ from sklearn.decomposition import PCA
 # Global config
 ARTICLE_SPLITTER = re.compile(r"^##$", re.MULTILINE)
 METADATA_SPLITTER = re.compile(r"^\+\+$", re.MULTILINE)
-DATA_DIR = '../data/geopolitical'
+DATA_DIR = './data/geopolitical'
 PICKLE_DIR = './.pickled'
 if not os.path.exists(PICKLE_DIR):
   os.mkdir(PICKLE_DIR)
@@ -85,12 +85,10 @@ def load_file(basename):
 #%%
 #CountVecotrizer
 
-def encoding(file_name):
+def encoding(articles):
     
-    articles = load_file(file_name)
-    
-    count_vect = CountVectorizer(stopwords='english')
-    
+    count_vect = CountVectorizer()
+    #add back stopwords
     X = count_vect.fit_transform(articles)
     
     for i, article in enumerate(articles):
@@ -98,40 +96,31 @@ def encoding(file_name):
         wordCount = len(temp)
         
         X[i] = X[i]/wordCount
-        
-    pickle.dump(articles, open(file_name+"-split.pkl", "wb"))
     
     return X
     
  
 #%%
 #Tokenization
-def token(file_name):
-    
-    articles = load_file(file_name)
-    
+def token(articles):
+        
     tokens = numpy.empty(articles.len())
-    count_vect = CountVectorizer(stopwords='english')
+    count_vect = CountVectorizer()
+    #add back stopwords
         
     tokens = [count_vect.fit_transform(a) for a in articles]
-    
-    pickle.dump(articles, open(file_name+"-split.pkl", "wb"))
     
     return tokens
 
 #%%
 #lemmatization from file
-def lem(file_name):
-    
-    articles = load_file(file_name)
-        
+def lem(articles):
+         
     lemma = numpy.empty(articles.len())
     lem = WordNetLemmatizer()
     
     lemma = [lem.lemmatize(a) for a in articles]
-    
-    pickle.dump(articles, open(file_name+"-split.pkl", "wb"))
-    
+        
     return lemma    
 
 #%%
@@ -151,27 +140,44 @@ def lem(file_name):
 #GloVe
 
 #%%
-#K-means
+#K-Means
 
-def kmeans(file_name):
-    
-    X = encoding(file_name)
+def kmeans(data):
     
     km = KMeans(n_clusters=2, init = 'random')
-    km.fit_predict(X)
+    X = km.fit_predict(data)
     
-    pca = PCA(n_components=2)
-    X_pca = pca.fit_transform(X)
-    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=km.labels_, alpha=.5)
+    return X
+
+#%%
+#visualization
+
+def visualize(data, components = 2)    :
+    
+    pca = PCA(n_components=components)
+    X_pca = pca.fit_transform(data)
+    plt.scatter(X_pca[:, 0], X_pca[:, 1],alpha=.5)
     plt.title("KMeans")
     plt.gca().set_aspect("equal")
     plt.figure()
     
     return
 
+#%%
+#Main Function
+
 if __name__ == "__main__":
   for basename in prog_args.basenames:
-    load_file(basename)
+    
+    articles = load_file(basename)
+    
+    data = encoding(articles)
+    
+    X = kmeans(data)
+    
+    visualize(X)    
+    
+    pickle.dump(articles, open(basename+"-split.pkl", "wb"))
 
 
 #%%
