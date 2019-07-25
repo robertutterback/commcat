@@ -8,7 +8,6 @@ Created on Thu Jul 11 17:54:07 2019
 
 #%%
 import pickle, os, sys, argparse, re
-import codecs # to decode the weird CP1252 files
 import numpy as np
 from nltk import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
@@ -53,7 +52,14 @@ def load_new_file(basename):
 
     assert os.path.exists(filename), f"{filename} does not exist!"
 
-    with codecs.open(filename, 'rb', 'cp1252') as f:
+    # The files are weirdly encoded as CP1252. But using the 'codecs'
+    # package here has trouble with the different line endings of
+    # various OSes, as it doesn't automatically convert them. This
+    # will work for now, there there will be lots of '?' inserted
+    # where CP1252 characters don't translate to UTF-8. If all
+    # developers switch to Linux we can switch back to using codecs.
+    #  - codecs.open(filename, 'rb', encoding='cp1252') as f:
+    with open(filename, 'r', errors='ignore') as f:
         full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
 
     article_bodies = [get_body(a) for a in full_articles]
