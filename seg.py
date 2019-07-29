@@ -11,9 +11,11 @@ import pickle, os, sys, argparse, re
 import numpy as np
 from nltk import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from scipy.sparse import csr_matrix
 
 #%%
 
@@ -43,7 +45,15 @@ def get_body(article):
     parts = re.split(METADATA_SPLITTER, article)
     assert len(parts) == 2, "\n\nArticle splitting failed!"
     return parts[1]
-    
+
+def slice(filename):
+    with open(filename, 'r', errors='ignore') as f:
+        full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
+
+    article_bodies = [get_body(a) for a in full_articles]
+
+    return article_bodies
+
 # Reads articles from a file, removing metadata and returning a list
 # of articles.
 def load_new_file(basename):
@@ -51,7 +61,13 @@ def load_new_file(basename):
     vprint(f"Processing {filename}", end='')
 
     assert os.path.exists(filename), f"{filename} does not exist!"
+    
+    article_bodies = slice(filename)
 
+    with open(pickle_name(basename, 'split'), 'wb') as f:
+        pickle.dump(article_bodies, f)
+
+    return article_bodies
     # The files are weirdly encoded as CP1252. But using the 'codecs'
     # package here has trouble with the different line endings of
     # various OSes, as it doesn't automatically convert them. This
@@ -59,7 +75,8 @@ def load_new_file(basename):
     # where CP1252 characters don't translate to UTF-8. If all
     # developers switch to Linux we can switch back to using codecs.
     #  - codecs.open(filename, 'rb', encoding='cp1252') as f:
-    with open(filename, 'r', errors='ignore') as f:
+    
+    """ with open(filename, 'r', errors='ignore') as f:
         full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
 
     article_bodies = [get_body(a) for a in full_articles]
@@ -68,6 +85,7 @@ def load_new_file(basename):
         pickle.dump(article_bodies, f)
 
     return article_bodies
+    """
 
 def load_pickled(filename):
     vprint(f"Loading pickled data from {filename}", end='')
@@ -96,7 +114,7 @@ def load_multiple(basenames):
 #%%
 #CountVecotrizer
 
-def encoding(articles):
+def cv_encoding(articles):
     vectorizer = CountVectorizer()
     # We convert to float so that we can divide
     X = vectorizer.fit_transform(articles).astype(np.float32)
@@ -127,6 +145,10 @@ def lem(articles):
 #tf-idf
 #word embedding
 
+def tfidf_encoding(articles):
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(articles).astype(np.float32)    
+    return X
 
 #%%
 #word2vec / doc2vec
@@ -165,8 +187,9 @@ def visualize(X, labels, centers):
 
 if __name__ == "__main__":
     articles = load_multiple(prog_args.basenames)
-    X = encoding(articles)
+    X = cv_encoding(articles)
     labels, centers = kmeans(X)
+    X = X.todense()
     visualize(X, labels, centers) 
 
 #%%
