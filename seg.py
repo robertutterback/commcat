@@ -150,7 +150,7 @@ def tfidf_encoding(articles):
 #%%
 #K-Means
 
-def kmeans(X, num_clusters=2):
+def kmeans(X, num_clusters=3):
     km = KMeans(n_clusters=num_clusters)
     model = km.fit(X)
     return model.labels_, model.cluster_centers_
@@ -166,11 +166,9 @@ def visualize(X, labels, centers):
 
     # TODO: Also plot the cluster centers
     
-    n_clusters = np.unique(labels)
+    n_clusters = len(np.unique(labels))
     plt.title(f"KMeans Clustering with {n_clusters} clusters, PCA")
-    plt.gca().set_aspect("equal")
-    plt.figure()
-    
+    plt.show()
     return
 
 #%%
