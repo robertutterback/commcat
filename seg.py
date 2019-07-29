@@ -24,15 +24,6 @@ ARTICLE_SPLITTER = re.compile(r"^##$", re.MULTILINE)
 METADATA_SPLITTER = re.compile(r"^\+\+$", re.MULTILINE)
 DATA_DIR = './data/geopolitical'
 PICKLE_DIR = './.pickled'
-if not os.path.exists(PICKLE_DIR):
-    os.mkdir(PICKLE_DIR)
-
-# Arguments
-parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--verbose", help="Print lots of information",
-                    action="store_true", default=True)
-parser.add_argument("basenames", nargs='+')
-prog_args = parser.parse_args()
 
 def vprint(*args, **kwargs):
     if prog_args.verbose:
@@ -185,12 +176,23 @@ def visualize(X, labels, centers):
 #%%
 #Main Function
 
-if __name__ == "__main__":
-    articles = load_multiple(prog_args.basenames)
+def main(basenames):
+    if not os.path.exists(PICKLE_DIR):
+        os.mkdir(PICKLE_DIR)
+
+    articles = load_multiple(basenames)
     X = cv_encoding(articles)
     labels, centers = kmeans(X)
     X = X.todense()
     visualize(X, labels, centers) 
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--verbose", help="Print lots of information",
+                        action="store_true", default=True)
+    parser.add_argument("basenames", nargs='+')
+    prog_args = parser.parse_args()
+    main(args.basenames)
 
 #%%
 #Naive-bayes    
