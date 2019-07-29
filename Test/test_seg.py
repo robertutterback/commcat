@@ -10,34 +10,70 @@ import seg
 
 class TestSeg(unittest.TestCase):
     
-    """ def test_met(self):
+    def test_load_new_file(self):
         
-        txt = {}
-        act = seg.met(txt)
-        exp = {}
-        self.assertEqual(act, exp)
-        
-        txt = {"b++a"}
-        act = seg.met(txt)
-        exp = {"a"}
-        self.assertEqual(act, exp)
-        
-        txt = {"b++a","a++b"}
-        act = seg.met(txt)
-        exp = {"a","b"}
-        self.assertEqual(act, exp) """
-    
-    def test_seg(self):
-        
-        act = seg.seg(r"emptyText.txt")
+        """ act = seg.load_new_file(r"emptyText.txt")
         exp = ['']
         self.assertEqual(act, exp)
         
-        act = seg.seg(r"testFile1.txt")
+        act = seg.load_new_file(r"testFile1.txt")
         exp = ["hello"]
         self.assertEqual(act, exp)
         
-        act = seg.seg(r"testFile2.txt")
+        act = seg.load_new_file(r"testFile2.txt")
+        exp = ["hello", "world"]
+        self.assertEqual(act, exp) """
+
+        act = seg.slice(r"emptyText.txt")
+        exp = ['']
+        self.assertEqual(act, exp)
+        
+        act = seg.slice(r"testFile1.txt")
+        exp = ["hello"]
+        self.assertEqual(act, exp)
+        
+        act = seg.slice(r"testFile2.txt")
+        exp = ["hello", "world"]
+        self.assertEqual(act, exp)
+
+        act = seg.slice(r"slice_test.txt")
+        exp = [""" 
+            Our Applause customers rely on uTesters around the world to be able to provide real-world feedback on an increasingly wide array of devices. Today we are spotlighting a type of device that has been gaining popularity amongst the devices needing to be tested on uTest: Virtual reality systems.
+            """,
+            """
+            Tokyo 2020: Meet the Olympic and Paralympic robots
+            What are your favorite Olympic sports? Are you excited for the 2020 Tokyo Olympics?
+            Tokyo will use a Robots as Olympic mascots to greet people when they get to venues and to give virtual access to people who can't attend the games.
+            """ ]
+        self.assertEqual(act, exp)
+
+# =============================================================================
+#     def test_load_pickled(self):
+#         
+#         act = seg.load_pickled(r"emptyText.txt")
+#         exp = ['']
+#         self.assertEqual(act, exp)
+#         
+#         act = seg.load_pickled(r"testFile1.txt")
+#         exp = ["hello"]
+#         self.assertEqual(act, exp)
+#         
+#         act = seg.load_pickled(r"testFile2.txt")
+#         exp = ["hello", "world"]
+#         self.assertEqual(act, exp)
+# =============================================================================
+        
+"""     def test_load_file(self):
+        
+        act = seg.load_file(r"emptyText.txt")
+        exp = ['']
+        self.assertEqual(act, exp)
+        
+        act = seg.load_file(r"testFile1.txt")
+        exp = ["hello"]
+        self.assertEqual(act, exp)
+        
+        act = seg.load_file(r"testFile2.txt")
         exp = ["hello", "world"]
         self.assertEqual(act, exp)
     
@@ -71,7 +107,7 @@ class TestSeg(unittest.TestCase):
         
         act = seg.lem(r"testFile4(lem).txt")
         exp = ["write", "write"]
-        self.assertEqual(act, exp)
+        self.assertEqual(act, exp) """
         
 if __name__ == '__main__':
     unittest.main()
