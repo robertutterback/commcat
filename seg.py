@@ -37,13 +37,11 @@ def get_body(article):
     assert len(parts) == 2, "\n\nArticle splitting failed!"
     return parts[1]
 
-def slice(filename):
-    with open(filename, 'r', errors='ignore') as f:
-        full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
+def metadataRemoverArticleSplitter(f):
+    
+    full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
 
-    article_bodies = [get_body(a) for a in full_articles]
-
-    return article_bodies
+    return full_articles
 
 # Reads articles from a file, removing metadata and returning a list
 # of articles.
@@ -53,12 +51,16 @@ def load_new_file(basename):
 
     assert os.path.exists(filename), f"{filename} does not exist!"
     
-    article_bodies = slice(filename)
+    with open(filename, 'r', errors='ignore') as f:
+        full_articles = metadataRemoverArticleSplitter(f)
+
+    article_bodies = [get_body(a) for a in full_articles]
 
     with open(pickle_name(basename, 'split'), 'wb') as f:
         pickle.dump(article_bodies, f)
 
     return article_bodies
+
     # The files are weirdly encoded as CP1252. But using the 'codecs'
     # package here has trouble with the different line endings of
     # various OSes, as it doesn't automatically convert them. This
@@ -181,7 +183,7 @@ def main(basenames):
     articles = load_multiple(basenames)
     X = cv_encoding(articles)
     labels, centers = kmeans(X)
-    X = X.todense()
+    X = X.toarray()
     visualize(X, labels, centers) 
 
 if __name__ == "__main__":
