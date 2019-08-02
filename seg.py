@@ -9,11 +9,13 @@ Created on Thu Jul 11 17:54:07 2019
 #%%
 import pickle, os, sys, argparse, re
 import numpy as np
+import pandas as pd
 from nltk import WordNetLemmatizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 from scipy.sparse import csr_matrix
 
@@ -37,9 +39,9 @@ def get_body(article):
     assert len(parts) == 2, "\n\nArticle splitting failed!"
     return parts[1]
 
-def metadataRemoverArticleSplitter(f):
+def metadata_remover_article_splitter(f):
     
-    full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
+    full_articles = re.split(ARTICLE_SPLITTER, f)[1:]
 
     return full_articles
 
@@ -52,7 +54,9 @@ def load_new_file(basename):
     assert os.path.exists(filename), f"{filename} does not exist!"
     
     with open(filename, 'r', errors='ignore') as f:
-        full_articles = metadataRemoverArticleSplitter(f)
+        temp = f.read
+        
+    full_articles = metadata_remover_article_splitter(temp)
 
     article_bodies = [get_body(a) for a in full_articles]
 
@@ -155,7 +159,20 @@ def tfidf_encoding(articles):
 def kmeans(X, num_clusters=3):
     km = KMeans(n_clusters=num_clusters)
     model = km.fit(X)
-    return model.labels_, model.cluster_centers_
+    dist = km.transform(X)
+    return model.labels_, model.cluster_centers_, dist
+
+#%%
+
+def points_near_centroid(X, centers, dist, labels):
+    dist = dist ** 2
+
+    df = pd.DataFrame(dist.sum(axis=1).round(2), columns=['sqdist'])
+    df['label'] = labels
+
+    df.head()
+
+    return
 
 #%%
 #visualization
@@ -184,7 +201,10 @@ def main(basenames):
     X = cv_encoding(articles)
     labels, centers = kmeans(X)
     X = X.toarray()
-    visualize(X, labels, centers) 
+
+
+
+    visualize(X, labels, centers)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
