@@ -34,17 +34,17 @@ def vprint(*args, **kwargs):
 def pickle_name(basename, stepname):
     return f"{PICKLE_DIR}/{basename}-{stepname}.pkl"
 
-def split_metadata(full_txt):
-    parts = re.split(METADATA_SPLITTER, article)
+def split_metadata(full_article):
+    parts = re.split(METADATA_SPLITTER, full_article)
     assert len(parts) == 2, "\n\nMetadata splitting failed!"
     return parts
 
 def get_body(full_txt):
     return split_metadata(full_txt)[1]
 
-def split_articles(txt):
-    full_articles = re.split(ARTICLE_SPLITTER, txt)[1:]
-    return full_articles
+def split_articles(corpus):
+    articles = re.split(ARTICLE_SPLITTER, corpus)[1:]
+    return articles
 
 # Reads articles from a file, removing metadata and returning a list
 # of articles.
@@ -57,14 +57,13 @@ def load_new_file(basename):
     with open(filename, 'r', errors='ignore') as f:
         corpus = f.read()
         
-    articles = metadata_remover_article_splitter(corpus)
-
-    article_bodies = [get_body(a) for a in full_articles]
+    articles = split_articles(corpus)
+    bodies = [get_body(a) for a in articles]
 
     with open(pickle_name(basename, 'split'), 'wb') as f:
-        pickle.dump(article_bodies, f)
+        pickle.dump(bodies, f)
 
-    return article_bodies
+    return bodies
 
 def load_pickled(filename):
     vprint(f"Loading pickled data from {filename}", end='')
