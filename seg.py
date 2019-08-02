@@ -34,15 +34,16 @@ def vprint(*args, **kwargs):
 def pickle_name(basename, stepname):
     return f"{PICKLE_DIR}/{basename}-{stepname}.pkl"
 
-def get_body(article):
+def split_metadata(full_txt):
     parts = re.split(METADATA_SPLITTER, article)
-    assert len(parts) == 2, "\n\nArticle splitting failed!"
-    return parts[1]
+    assert len(parts) == 2, "\n\nMetadata splitting failed!"
+    return parts
 
-def metadata_remover_article_splitter(f):
-    
-    full_articles = re.split(ARTICLE_SPLITTER, f)[1:]
+def get_body(full_txt):
+    return split_metadata(full_txt)[1]
 
+def split_articles(txt):
+    full_articles = re.split(ARTICLE_SPLITTER, txt)[1:]
     return full_articles
 
 # Reads articles from a file, removing metadata and returning a list
@@ -54,9 +55,9 @@ def load_new_file(basename):
     assert os.path.exists(filename), f"{filename} does not exist!"
     
     with open(filename, 'r', errors='ignore') as f:
-        temp = f.read
+        corpus = f.read()
         
-    full_articles = metadata_remover_article_splitter(temp)
+    articles = metadata_remover_article_splitter(corpus)
 
     article_bodies = [get_body(a) for a in full_articles]
 
@@ -64,25 +65,6 @@ def load_new_file(basename):
         pickle.dump(article_bodies, f)
 
     return article_bodies
-
-    # The files are weirdly encoded as CP1252. But using the 'codecs'
-    # package here has trouble with the different line endings of
-    # various OSes, as it doesn't automatically convert them. This
-    # will work for now, there there will be lots of '?' inserted
-    # where CP1252 characters don't translate to UTF-8. If all
-    # developers switch to Linux we can switch back to using codecs.
-    #  - codecs.open(filename, 'rb', encoding='cp1252') as f:
-    
-    """ with open(filename, 'r', errors='ignore') as f:
-        full_articles = re.split(ARTICLE_SPLITTER, f.read())[1:]
-
-    article_bodies = [get_body(a) for a in full_articles]
-
-    with open(pickle_name(basename, 'split'), 'wb') as f:
-        pickle.dump(article_bodies, f)
-
-    return article_bodies
-    """
 
 def load_pickled(filename):
     vprint(f"Loading pickled data from {filename}", end='')
