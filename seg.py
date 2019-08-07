@@ -101,8 +101,7 @@ def cv_encoding(articles):
         wordCount = len(article.split())
         X[i] /= wordCount
     
-    return X
-    
+    return X, vectorizer.vocabulary_
  
 #%%
 
@@ -145,14 +144,17 @@ def kmeans(X, num_clusters=3):
 
 #%%
 
-def points_near_centroid(X, centers, dist, labels):
-    dist = dist ** 2
-
-    df = pd.DataFrame(dist.sum(axis=1).round(2), columns=['sqdist'])
+def points_near_centroid(articles, dist, labels):
+    
+    """ df = pd.DataFrame(dist.sum(axis=1).round(2), columns=['sqdist'])
     df['label'] = labels
 
-    df.head()
+    df.head() """
 
+    indices = np.argpartition(dist, 2)
+
+    for i in indices[1]:
+        print(articles[i])
     return
 
 #%%
@@ -179,11 +181,15 @@ def main(basenames):
         os.mkdir(PICKLE_DIR)
 
     articles = load_multiple(basenames)
-    X = cv_encoding(articles)
-    labels, centers = kmeans(X)
+    X, vocab = cv_encoding(articles)
+    labels, centers, dist = kmeans(X)
     X = X.toarray()
 
-
+    #print(dist)
+    print(vocab)
+    print(centers)
+    #print(articles)
+    points_near_centroid(articles, dist, labels)
 
     visualize(X, labels, centers)
 
@@ -194,12 +200,3 @@ if __name__ == "__main__":
     parser.add_argument("basenames", nargs='+')
     prog_args = parser.parse_args()
     main(prog_args.basenames)
-
-#%%
-#Naive-bayes    
-
-
-#%%
-#dbscan
-
-#%%
