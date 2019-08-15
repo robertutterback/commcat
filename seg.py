@@ -151,10 +151,16 @@ def points_near_centroid(articles, dist, labels):
 
     df.head() """
 
-    indices = np.argpartition(dist, 2)
+    indices = np.argpartition(dist, 3)
+
+    f = open("top articles.txt", "w")
 
     for i in indices[1]:
-        print(articles[i])
+        f.write(articles[i])
+        f.write()
+    
+    f.close()
+
     return
 
 #%%
@@ -185,9 +191,16 @@ def main(basenames):
     labels, centers, dist = kmeans(X)
     X = X.toarray()
 
-    #print(dist)
-    print(vocab)
+    print(dist.shape)
+    print(dist)
+
+    with open('vocab.txt', 'w', errors='ignore') as f:
+        f.write(str(vocab))
+
+    #with open('cluster centers.txt', 'w', errors='ignore') as f:
+    #    f.write(centers)
     print(centers)
+
     #print(articles)
     points_near_centroid(articles, dist, labels)
 
