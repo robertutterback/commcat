@@ -3,10 +3,9 @@
 """
 Created on Thu Jul 11 17:54:07 2019
 
-@author: Abhi
+@author: Abhi Jouhal, Robert Utterback
 """
 
-#%%
 import pickle, os, sys, argparse, re
 import numpy as np
 import pandas as pd
@@ -17,8 +16,6 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 from scipy.sparse import csr_matrix
-
-#%%
 
 # Global config
 ARTICLE_SPLITTER = re.compile(r"^##$", re.MULTILINE)
@@ -88,9 +85,6 @@ def load_multiple(basenames):
         articles.extend(load_file(basename))
     return articles
 
-#%%
-#CountVecotrizer
-
 def cv_encoding(articles):
     vectorizer = CountVectorizer()
     # We convert to float so that we can divide
@@ -102,38 +96,10 @@ def cv_encoding(articles):
 
     return X, vectorizer.vocabulary_
 
-#%%
-
-#%%
-#lemmatization from file
-def lem(articles):
-    lemma = np.empty(articles.len()) # ???
-    lem = WordNetLemmatizer()
-    lemma = [lem.lemmatize(a) for a in articles]
-    return lemma
-
-#%%
-#lemmatization from tokens
-
-
-#%%
-#Bag of words
-#tf-idf
-#word embedding
-
 def tfidf_encoding(articles):
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(articles).astype(np.float32)
     return X
-
-#%%
-#word2vec / doc2vec
-
-#%%
-#GloVe
-
-#%%
-#K-Means
 
 def kmeans(X, num_clusters=3):
     km = KMeans(n_clusters=num_clusters)
@@ -148,9 +114,6 @@ def find_nearest(articles, dist, labels, n=5):
   k = len(np.unique(labels))
   articles = np.array(articles)
   return [articles[partitioned[:n,i]] for i in range(k)]
-
-#%%
-#visualization
 
 def visualize(X, labels, centers):
     pca = PCA(n_components=2)
@@ -173,11 +136,6 @@ def main(basenames):
     X, vocab = cv_encoding(articles)
     labels, centers, dist = kmeans(X)
     X = X.toarray()
-
-    #print(dist)
-    # print(vocab)
-    # print(centers)
-    #print(articles)
 
     #visualize(X, labels, centers)
     nearest = find_nearest(articles, dist, labels)
