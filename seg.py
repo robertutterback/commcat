@@ -11,8 +11,7 @@ import pickle, os, sys, argparse, re
 import numpy as np
 import pandas as pd
 from nltk import WordNetLemmatizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
@@ -53,10 +52,10 @@ def load_new_file(basename):
     vprint(f"Processing {filename}", end='')
 
     assert os.path.exists(filename), f"{filename} does not exist!"
-    
+
     with open(filename, 'r', errors='ignore') as f:
         corpus = f.read()
-        
+
     articles = split_articles(corpus)
     bodies = [get_body(a) for a in articles]
 
@@ -96,13 +95,13 @@ def cv_encoding(articles):
     vectorizer = CountVectorizer()
     # We convert to float so that we can divide
     X = vectorizer.fit_transform(articles).astype(np.float32)
-    
+
     for i, article in enumerate(articles):
         wordCount = len(article.split())
         X[i] /= wordCount
-    
+
     return X, vectorizer.vocabulary_
- 
+
 #%%
 
 #%%
@@ -111,11 +110,11 @@ def lem(articles):
     lemma = np.empty(articles.len()) # ???
     lem = WordNetLemmatizer()
     lemma = [lem.lemmatize(a) for a in articles]
-    return lemma    
+    return lemma
 
 #%%
 #lemmatization from tokens
-    
+
 
 #%%
 #Bag of words
@@ -124,7 +123,7 @@ def lem(articles):
 
 def tfidf_encoding(articles):
     vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform(articles).astype(np.float32)    
+    X = vectorizer.fit_transform(articles).astype(np.float32)
     return X
 
 #%%
@@ -144,18 +143,11 @@ def kmeans(X, num_clusters=3):
 
 #%%
 
-def points_near_centroid(articles, dist, labels):
-    
-    """ df = pd.DataFrame(dist.sum(axis=1).round(2), columns=['sqdist'])
-    df['label'] = labels
-
-    df.head() """
-
-    indices = np.argpartition(dist, 2)
-
-    for i in indices[1]:
-        print(articles[i])
-    return
+def find_nearest(articles, dist, labels, n=5):
+  partitioned = np.argpartition(dist, n, axis=0)
+  k = len(np.unique(labels))
+  articles = np.array(articles)
+  return [articles[partitioned[:n,i]] for i in range(k)]
 
 #%%
 #visualization
@@ -167,14 +159,11 @@ def visualize(X, labels, centers):
     plt.scatter(X_pca[:, 0], X_pca[:, 1], c=labels, alpha=.5)
 
     # TODO: Also plot the cluster centers
-    
+
     n_clusters = len(np.unique(labels))
     plt.title(f"KMeans Clustering with {n_clusters} clusters, PCA")
     plt.show()
     return
-
-#%%
-#Main Function
 
 def main(basenames):
     if not os.path.exists(PICKLE_DIR):
@@ -186,12 +175,24 @@ def main(basenames):
     X = X.toarray()
 
     #print(dist)
-    print(vocab)
-    print(centers)
+    # print(vocab)
+    # print(centers)
     #print(articles)
-    points_near_centroid(articles, dist, labels)
 
-    visualize(X, labels, centers)
+    #visualize(X, labels, centers)
+    nearest = find_nearest(articles, dist, labels)
+
+    k = len(np.unique(labels))
+    assert k == 3
+
+    nclosest = 5
+    for i in range(k):
+      with open(f"output/cluster{i}.txt", 'w') as f:
+        f.write(f"----- Cluster {i} -----\n")
+        for j in range(nclosest):
+          f.write(nearest[i][j])
+          f.write("\n -------------------- \n")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
