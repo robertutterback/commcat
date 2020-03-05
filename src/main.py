@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3 more text
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter.constants import *
